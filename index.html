@@ -1,0 +1,702 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Book Battle Prep</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Young+Serif&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: card-catalog drawer — stamped header, mode tabs, one index card in play, book "spines" as filters */
+:root{
+  --bg:#eef1ee; --paper:#fbfcfa; --ink:#1c2a26; --muted:#5d6d67; --line:#cfd8d3; --soft:#e3e9e5;
+  --accent:#1f5f52; --accent-ink:#ffffff; --stamp:#b0412e; --good:#2f7a45; --bad:#b0412e; --warn:#8a6414;
+  --b1:#8a5a2b; --b2:#3b5f8f; --b3:#a8783a; --b4:#b5473a; --b5:#4f6b3a; --b6:#6a4a7e;
+  --display:"Young Serif",Georgia,"Times New Roman",serif;
+  --body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121816; --paper:#1a2220; --ink:#e3ebe7; --muted:#97a8a1; --line:#2f3b37; --soft:#232d2a;
+  --accent:#5fb3a0; --accent-ink:#0d1513; --stamp:#e2765f; --good:#6cc287; --bad:#e2765f; --warn:#e0b45a;
+  --b1:#d1995f; --b2:#7ea4d6; --b3:#d9ab68; --b4:#e07c6c; --b5:#93b57a; --b6:#b293c7; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121816; --paper:#1a2220; --ink:#e3ebe7; --muted:#97a8a1; --line:#2f3b37; --soft:#232d2a;
+  --accent:#5fb3a0; --accent-ink:#0d1513; --stamp:#e2765f; --good:#6cc287; --bad:#e2765f; --warn:#e0b45a;
+  --b1:#d1995f; --b2:#7ea4d6; --b3:#d9ab68; --b4:#e07c6c; --b5:#93b57a; --b6:#b293c7; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 48px}
+.wrap{max-width:880px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:12px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(1.9rem,5vw,2.6rem);line-height:1.05;margin:0;text-wrap:balance}
+.sub{color:var(--muted);margin:4px 0 0;max-width:62ch}
+.stampbox{font-family:var(--mono);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--stamp);border:2px solid var(--stamp);padding:4px 10px;transform:rotate(-2deg);white-space:nowrap}
+nav.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{font:700 .95rem var(--body);border:1px solid var(--line);background:var(--paper);color:var(--ink);padding:8px 14px;border-radius:999px;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.label{font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.filters{display:flex;flex-direction:column;gap:10px}
+.spines{display:flex;flex-wrap:wrap;gap:8px}
+.spine{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink);padding:6px 12px 6px 6px;border-radius:6px;font:400 .9rem var(--body);cursor:pointer;text-align:left}
+.spine i{width:6px;align-self:stretch;min-height:18px;border-radius:3px;background:var(--c);flex:none}
+.spine[aria-pressed="false"]{opacity:.45}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.seg{display:flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.seg button{font:400 .88rem var(--body);background:var(--paper);color:var(--ink);border:0;padding:6px 12px;cursor:pointer;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:22px clamp(18px,4vw,36px) 22px;position:relative;
+  box-shadow:0 1px 0 var(--line),0 6px 18px -12px rgba(0,0,0,.35);min-height:300px;display:flex;flex-direction:column;gap:16px}
+.cardtop{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding-bottom:10px;border-bottom:2px solid var(--stamp)}
+.type{font-family:var(--mono);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--stamp)}
+.count{font-family:var(--mono);font-size:.75rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.q{font-family:var(--display);font-size:clamp(1.2rem,3.2vw,1.55rem);line-height:1.38;margin:4px 0 0;text-wrap:pretty}
+.blank{display:inline-block;min-width:4.5em;border-bottom:2px solid var(--ink);margin:0 .1em}
+.inputs{display:flex;flex-direction:column;gap:10px;max-width:520px}
+.inputs label{display:flex;flex-direction:column;gap:4px;font-size:.88rem;color:var(--muted)}
+.inputs input{font:400 1.05rem var(--body);padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);width:100%}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px}
+.opt{font:400 1rem var(--body);text-align:left;padding:12px 14px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);cursor:pointer;display:flex;gap:10px;align-items:flex-start}
+.opt b{font-family:var(--mono);font-size:.8rem;color:var(--muted);padding-top:2px}
+.opt:hover:not([disabled]){border-color:var(--ink)}
+.opt.right{border-color:var(--good);box-shadow:inset 0 0 0 1px var(--good)}
+.opt.wrong{border-color:var(--bad);box-shadow:inset 0 0 0 1px var(--bad)}
+.opt[disabled]{cursor:default}
+.verdict{border-radius:6px;padding:12px 14px;border:1px solid var(--line);background:var(--soft);display:flex;flex-direction:column;gap:4px}
+.verdict .v{font-family:var(--mono);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase}
+.verdict.ok .v{color:var(--good)} .verdict.no .v{color:var(--bad)} .verdict.close .v{color:var(--warn)}
+.verdict .t{font-family:var(--display);font-size:1.15rem}
+.verdict .a{color:var(--muted);font-size:.95rem}
+.actions{margin-top:auto;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.btn{font:700 1rem var(--body);border-radius:6px;padding:10px 18px;cursor:pointer;border:1px solid var(--ink);background:var(--paper);color:var(--ink)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn[disabled]{opacity:.5;cursor:default}
+.hint{color:var(--muted);font-size:.85rem}
+.timer{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:1rem;color:var(--ink)}
+.timer.low{color:var(--bad)}
+.bar{height:4px;background:var(--soft);border-radius:2px;overflow:hidden}
+.bar span{display:block;height:100%;background:var(--accent);transition:width 1s linear}
+.tally{display:flex;gap:18px;flex-wrap:wrap;font-variant-numeric:tabular-nums;color:var(--muted);font-size:.92rem}
+.tally b{color:var(--ink)}
+.linkbtn{background:none;border:0;color:var(--accent);font:inherit;text-decoration:underline;cursor:pointer;padding:0}
+.review{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
+.review li{border-top:1px solid var(--line);padding-top:10px;display:flex;flex-direction:column;gap:2px}
+.review .mark{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase}
+.review .mark.ok{color:var(--good)} .review .mark.no{color:var(--bad)}
+.review .yours{color:var(--muted);font-size:.9rem}
+.setup{display:flex;flex-direction:column;gap:12px}
+/* briefs */
+.bookpick{display:flex;flex-wrap:wrap;gap:8px}
+.brief{background:var(--paper);border:1px solid var(--line);border-top:6px solid var(--c);border-radius:4px;padding:22px clamp(18px,4vw,34px);display:flex;flex-direction:column;gap:22px}
+.brief h2{font-family:var(--display);font-weight:400;font-size:clamp(1.5rem,4vw,2rem);line-height:1.15;margin:0;text-wrap:balance}
+.brief .by{color:var(--muted);margin:2px 0 0;font-size:1.02rem}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px 18px;margin:0}
+.facts div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.facts dt{font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.facts dd{margin:0;font-size:.95rem}
+.brief h3{font-family:var(--mono);font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--stamp);margin:0 0 8px;font-weight:500}
+.brief p{margin:0 0 10px;max-width:68ch}
+.cast{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:6px 22px;margin:0}
+.cast div{display:grid;grid-template-columns:minmax(0,9.5em) 1fr;gap:10px;border-bottom:1px dotted var(--line);padding:6px 0;min-width:0}
+.cast dt{font-weight:700;min-width:0;overflow-wrap:anywhere}
+.cast dd{margin:0;color:var(--ink);font-size:.93rem;min-width:0}
+.places{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:4px;max-width:70ch}
+.fun{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px;max-width:70ch}
+.fun li{padding-left:1.4em;position:relative}
+.fun li::before{content:"✦";position:absolute;left:0;color:var(--c)}
+details.spoil summary{cursor:pointer;font-weight:700;color:var(--accent)}
+details.spoil[open] summary{margin-bottom:10px}
+.foot{color:var(--muted);font-size:.85rem;max-width:72ch}
+.empty{color:var(--muted)}
+</style>
+<style>[hidden]{display:none!important}img{max-width:100%}</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Book Battle Prep</h1>
+      <p class="sub">Six books. Fill-in-the-blank, true/false and multiple choice, in "In which book," content-recall and crossover form. Type or tap your answer and get graded right away.</p>
+    </div>
+    <div class="stampbox">Battle week · Due</div>
+  </header>
+
+  <nav class="tabs" role="tablist" aria-label="Mode">
+    <button class="tab" role="tab" id="tab-practice" aria-selected="true">Practice</button>
+    <button class="tab" role="tab" id="tab-round" aria-selected="false">Timed round</button>
+    <button class="tab" role="tab" id="tab-briefs" aria-selected="false">Book briefs</button>
+  </nav>
+
+  <section class="filters" id="filters">
+    <div class="label">Books</div>
+    <div class="spines" id="spines"></div>
+    <div class="label">Question style</div>
+    <div class="row">
+      <div class="seg" id="fmtSeg" role="group" aria-label="Format">
+        <button data-v="mix" aria-pressed="true">Mixed</button>
+        <button data-v="fill" aria-pressed="false">Fill in the blank</button>
+        <button data-v="tf" aria-pressed="false">True / false</button>
+        <button data-v="mc" aria-pressed="false">Multiple choice</button>
+      </div>
+      <div class="seg" id="typeSeg" role="group" aria-label="Question type">
+        <button data-v="all" aria-pressed="true">Both types</button>
+        <button data-v="iwb" aria-pressed="false">In which book</button>
+        <button data-v="content" aria-pressed="false">Content</button>
+        <button data-v="cross" aria-pressed="false">Crossovers</button>
+      </div>
+      <div class="seg" id="poolSeg" role="group" aria-label="Pool">
+        <button data-v="all" aria-pressed="true">All questions</button>
+        <button data-v="missed" aria-pressed="false">Missed only</button>
+      </div>
+    </div>
+  </section>
+
+  <main id="view"></main>
+
+  <p class="foot">Questions and briefs were written from published summaries, reviews and author biographies, not the full texts. If a detail here doesn't match the book, trust the book. Your results are saved in this browser only.</p>
+</div>
+
+<script>
+const BOOKS = {
+ tb:{t:"Everything Is Tuberculosis",a:"John Green",c:"--b1",
+  titleAlts:["everything is tuberculosis","everything is tuberculosis the history and persistence of our deadliest infection"],
+  shortAlts:["tuberculosis","everything is tb","tb"],
+  authorAlts:["john green"],
+  facts:[["Full title","Everything Is Tuberculosis: The History and Persistence of Our Deadliest Infection"],["Published","March 18, 2025"],["Publisher","Crash Course Books"],["Length","About 208 pages"],["Genre","Nonfiction: history, science, memoir"],["Narrator","Green himself, first person"]],
+  cast:[["John Green","The author and narrator; a novelist who became a TB activist after a 2019 trip to Sierra Leone"],["Henry Reider","A TB patient at Lakka Government Hospital, 17 when Green meets him, so small Green first takes him for a child; cheerful and curious; eventually cured"],["Isatu","Henry's mother; grew up poor in a close community, lived through civil war, visits Henry almost daily"],["Favor","Henry's sister, who dies of a cyst blocking her airway because the family can't afford the procedure"],["Henry's father","Figures in Henry's early treatment history"],["Dr. Girum Tefera","TB doctor in Sierra Leone who pushes for better drugs and diagnostics for Henry"],["Robert Koch","German scientist who identified the TB bacterium in 1882, then promoted tuberculin as a cure that failed"],["Louis Pasteur","French scientist whose anthrax vaccine pressured Koch to rush a TB cure"],["Arthur Conan Doyle","Doctor and Sherlock Holmes author who went to see Koch's cure and concluded it didn't work"],["John Keats","Romantic poet who died of TB; his autopsy found his lungs almost entirely destroyed"],["Charles Dickens, Harriet Beecher Stowe","Novelists whose books (Nicholas Nickleby, Uncle Tom's Cabin) romanticized dying consumptives"],["Sukanta Bhattacharya, Masaoka Shiki","Indian and Japanese poets who wrote about living with TB"],["Alan Hart","American physician whose work on X-ray screening helped TB detection"],["Shreya Tripathi","Young Indian woman who fought for access to the drug bedaquiline"]],
+  places:["Lakka Government Hospital in Freetown, Sierra Leone, where Green meets Henry","Sierra Leone more broadly: its colonial history, civil war and underfunded health system","18th- and 19th-century Europe and America, where consumption was romanticized as a disease of the spirit","Sanatoriums, the rest-and-fresh-air treatment centers of the pre-antibiotic era","Peru, where Partners In Health showed drug-resistant TB could be cured in poor settings","India, the setting of Shreya Tripathi's fight for treatment"],
+  plot:["In 2019 Green visits Sierra Leone with Partners In Health to learn about maternal and newborn care. At Lakka Government Hospital he meets Henry Reider, a TB patient whose drugs are failing. Green can't stop thinking about him, or about the fact that TB, a curable disease, is still the world's deadliest infection.",
+   "The book alternates between Henry's story and the history of TB. Green covers the long stigma around the disease; its romantic era, when consumption was thought to heighten creativity and melancholy (the \"spes phthisica\"); Koch's discovery of the bacillus and his failed tuberculin \"cure\"; sanatoriums; and the arrival of antibiotics.",
+   "The modern section is about money and choices. Drug-resistant TB requires newer drugs such as bedaquiline that are priced beyond the reach of most patients. Green follows activists like Shreya Tripathi and the Partners In Health program in Peru, and argues that TB persists because of history and inequity, not biology.",
+   "Henry's second drug regimen fails, and his sister Favor dies. He decides to stay and try Dr. Girum's new approach, and with an individualized treatment regimen he is cured and goes home with Isatu. Green and Henry are still in touch."],
+  fun:["Henry shares his first name with Green's own son.","Green is the author of Looking for Alaska, The Fault in Our Stars, Turtles All the Way Down and the essay collection The Anthropocene Reviewed. This is his second nonfiction book.","Crash Course Books is a new Penguin imprint named for the educational video series Green runs with his brother Hank. The two are also YouTube's Vlogbrothers.","In 2023 Green spoke at the United Nations and rallied fans to pressure Johnson & Johnson and Cepheid to make bedaquiline and rapid TB tests more affordable. Both companies changed course.","The first printing was 500,000 copies, and Green signed 100,000 of them. The book tour started in Indianapolis, where he lives.","Green narrates the audiobook himself. The book was a #1 New York Times nonfiction bestseller and spent 23 weeks on the list."]},
+ cul:{t:"Culpability",a:"Bruce Holsinger",c:"--b2",
+  titleAlts:["culpability"],shortAlts:[],authorAlts:["bruce holsinger"],
+  facts:[["Published","July 8, 2025"],["Publisher","Spiegel & Grau"],["Length","About 380 pages"],["Genre","Family drama, techno-thriller"],["Narrator","Noah, first person"],["Club pick","Oprah's Book Club, July 2025"]],
+  cast:[["Noah Cassidy","Narrator and father; a corporate lawyer, working in the passenger seat when the crash happens"],["Lorelei Shaw","Noah's wife; an AI ethicist and MacArthur \"genius grant\" recipient who struggles with anxiety and OCD"],["Charlie","Eldest, 17; lacrosse star with a scholarship to UNC; in the driver's seat during the crash"],["Alice","Middle child, 13; concussed in the crash; her scream makes Charlie jerk the wheel"],["Izzy","Youngest, 10; breaks her leg; secretly the one who was texting Charlie"],["Phil and Judith Drummond","The elderly couple killed in the other car"],["Julia","Lorelei's sister, a lawyer"],["Det. Lacey Morrisey","Delaware State Police detective armed with the van's crash data"],["Amy Levinson","The family's therapist"],["Evan Ramsay III","Lawyer Noah hires for Charlie without telling him or Lorelei"],["Daniel Monet","Tech billionaire with a Chesapeake Bay estate; has a hidden working history with Lorelei"],["Eurydice \"Dissee\" Monet","Monet's daughter, who falls for Charlie"],["Blair","Alice's online confidant, an AvaPal chatbot that saves her messages"],["SensTrek","The family's self-driving minivan; its operating system comes from NaviTech"]],
+  places:["The highway, where the SensTrek minivan collides with the Drummonds' car","The hospital where the family is treated","The family's home after the crash","A vacation rental on the Chesapeake Bay with an AI virtual assistant","Daniel Monet's showy estate next door, with a helipad and aggressive security"],
+  plot:["The Cassidy-Shaw family is riding to Charlie's last youth lacrosse tournament in their self-driving SensTrek minivan. Charlie is in the driver's seat to monitor it, Noah is working beside him, and Lorelei is buried in her own work. Charlie is texting; Alice screams, he jerks the wheel and disengages the autonomous mode, and the van collides with another car. The family survives, but the elderly couple in the other car, Phil and Judith Drummond, are killed.",
+   "Detective Lacey Morrisey of the Delaware State Police arrives with the van's recorded data, and the question of blame begins: Charlie as the underage driver, Noah as the distracted adult, the machine itself. Charlie's UNC lacrosse scholarship is at risk. To recover, the family rents a house on the Chesapeake Bay, next door to AI billionaire Daniel Monet, whose daughter Dissee quickly draws Charlie in.",
+   "Noah learns that Monet owns their rental and fixed its air conditioning after Lorelei texted him, and he suspects an affair. He secretly hires lawyer Evan Ramsay III for Charlie. At Monet's party he drunkenly confronts Charlie. Then Izzy confesses that she was texting Charlie from the back seat just before the crash.",
+   "Alice learns that Blair, the chatbot she's been confiding in, saved her messages, including her admission that she screamed instead of telling her parents Charlie was texting. The secret between Lorelei and Monet isn't an affair: she consulted for him on an algorithm for NaviTech, and Monet adapted her work for the Army's weapons. Lorelei and Charlie go to the Drummond family to take responsibility, and everyone is left carrying a share of the blame."],
+  fun:["Holsinger is a medievalist and professor at the University of Virginia and edits the journal New Literary History.","He chairs the board of WriterHouse, a writing nonprofit in Charlottesville. Alix E. Harrow, author of Starling House, also lives in Charlottesville.","His earlier novels include The Gifted School and The Displacements; his nonfiction includes On Parchment.","The book was originally scheduled for October 2025 but was moved up when Oprah chose it for July.","Cross-book trap: the detective here is Lacey; so is Opal's gossipy coworker in Starling House."]},
+ lion:{t:"The Lion Women of Tehran",a:"Marjan Kamali",c:"--b3",
+  titleAlts:["lion women of tehran"],shortAlts:["lion women"],authorAlts:["marjan kamali"],
+  facts:[["Published","2024"],["Publisher","Gallery Books"],["Length","About 336 pages"],["Genre","Historical fiction"],["Spans","1950 to 2022"],["Dedication","To the brave women of Iran"]],
+  cast:[["Elaheh \"Ellie\" Soltani","Main narrator; loses her father at 7, grows up class-anxious and cautious; later lives in the U.S."],["Homa Roozbeh","Ellie's best friend; bold, funny, political; wants to study law and become a judge; imprisoned, later a teacher and activist"],["Ellie's mother","Proud, status-conscious, believes in the evil eye; refuses to work after her husband dies"],["Ellie's father","Dies of tuberculosis in 1950, leaving the family in financial trouble"],["Massoud","Ellie's wealthy uncle, who marries her mother and becomes her stepfather"],["Monir","Homa's warm mother, who feeds Ellie and teaches her to cook"],["Homa's father","Imprisoned after the 1953 coup"],["Mehrdad Tavakoli","Gentle chemistry student Ellie loves and marries; takes an academic job in New York"],["Abdol","Homa's devoted husband; works at a garage; dies in the Cinema Rex fire"],["Bahar","Homa and Abdol's daughter, sent to live with Ellie in New York"],["Sousan","Wealthy school friend trapped in marriage to the Colonel"],["The Colonel","Sousan's husband, who poses as an admirer of activist women but works for the secret police (SAVAK)"],["Niloo","Jewish friend from Ellie's high school"],["Afarin Molavi","Glamorous \"queen\" of the high school who secretly joins the student communist group"],["Angela","Friend in America who helps Ellie find work"],["Madison","Bahar's American classmate, who gets her to the hospital"],["Steve Murphy","Bahar's American husband"],["Leily","Homa's granddaughter, 18, growing up in the U.S."]],
+  places:["A wealthy home in Tehran, lost after Ellie's father dies","A small home downtown, near Homa's family","The Grand Bazaar","Reza Shah Kabir High School, Ellie's elite girls' school","Tehran University, where Homa joins communist student politics and Ellie studies English","Abadan, site of the Cinema Rex fire","A perfume counter in New York, where the novel opens in 1981","A Persian café in Massachusetts that Ellie owns by 2022"],
+  plot:["The novel opens in 1981 with Ellie, 38, working a perfume counter in New York. A whiff of tobacco sends her back to the night that ended her friendship with Homa, and a letter arrives from Homa after 17 years of silence.",
+   "In 1950 Ellie's father dies of tuberculosis and she and her mother move to a small home downtown. At school she meets Homa, and Homa's loving family becomes the warmth Ellie lacks. The girls vow to be \"lion women.\" They're separated when Ellie's mother marries Ellie's uncle Massoud and they move up in the world.",
+   "By 1960 Ellie is 17, polished, and in love with Mehrdad. Homa reappears at her school; her father was imprisoned after the 1953 coup, and she is fiercely political. At Tehran University Homa joins communist student politics while Ellie studies English. At a party, jealous after seeing Homa offer Mehrdad a taste of soup, Ellie talks with Sousan's husband, the Colonel, and confirms that Homa led a protest. The next day Homa is seized. The Colonel is SAVAK.",
+   "After prison Homa has married Abdol, has a daughter, Bahar, and wants nothing to do with Ellie. Ellie marries Mehrdad but suffers repeated miscarriages. Homa becomes a teacher. As revolution builds, Abdol dies in the 1978 Cinema Rex fire in Abadan. The shah falls, and the new regime brings veiling laws and violence against women; Homa fights back. Ellie and Mehrdad have moved to New York.",
+   "In 1981 Homa asks Ellie to take Bahar, who arrives in 1982. When Bahar is hospitalized for alcohol poisoning after a party, Ellie finally confesses. Homa reveals she never gave up Ellie's name under interrogation. In 2022, as protests follow the death of Mahsa Amini, Ellie runs a Persian café in Massachusetts and Homa, still fighting, writes to her granddaughter Leily."],
+  fun:["Kamali was born in Turkey to Iranian parents and lived in Iran, Germany, Kenya and Iran again before settling in the U.S. in 1982.","She holds an English degree from UC Berkeley, an MBA from Columbia and an MFA from NYU.","Her earlier novels are Together Tea (2013), a Massachusetts Book Award finalist, and The Stationery Shop (2019), an international bestseller.","The Cinema Rex fire was real: on August 19, 1978, an arson attack on a theater in Abadan killed roughly 400 people.","Cross-book link: Ellie's father dies of tuberculosis, the subject of John Green's book.","The audiobook is narrated by Mozhan Navabi and Nikki Massoud."]},
+ vera:{t:"Vera Wong's Unsolicited Advice for Murderers",a:"Jesse Q. Sutanto",c:"--b4",
+  titleAlts:["vera wongs unsolicited advice for murderers","vera wong unsolicited advice for murderers"],shortAlts:["vera wong","vera wongs unsolicited advice"],authorAlts:["jesse q sutanto","jesse sutanto"],
+  facts:[["Published","March 14, 2023"],["Length","About 340 pages"],["Genre","Cozy mystery"],["Series","Vera Wong #1"],["Narration","Rotating chapters: Vera, Julia, Riki, Sana, Oliver"]],
+  cast:[["Vera Wong","60-year-old Chinese widow, self-declared tea expert, relentless meddler; runs a nearly customerless teahouse"],["Tilly Wong","Vera's adult son, the target of her constant unsolicited advice"],["Alex Chen","Vera's one loyal customer and friend; claims his wife has Alzheimer's (she died long ago); revealed as Marshall's father, and his killer"],["Marshall Chen","The dead man in the teahouse; a con artist, bully and emotionally abusive husband who planned to abandon his family"],["Oliver Chen","Marshall's identical twin, the overlooked son; secretly brings their father groceries; writing a novel that mirrors his brother's life"],["Julia Chen","Marshall's widow; he pushed her out of photography school and isolated her"],["Emma","Julia and Marshall's young daughter, who comes to see Vera as a grandmother"],["Riki","Programmer on a work visa whom Marshall hired to build a scraper bot to manipulate the NFT market, then underpaid"],["Sana","Blocked artist with her own grudge against Marshall"],["Officer Gray","Police officer who calls the death natural and keeps telling Vera to stay out of it"]],
+  places:["Vera Wang's World-Famous Teahouse in San Francisco's Chinatown","Vera's home above the shop","Julia's home, where Vera helps with Emma","The suspects' homes, where Vera turns up uninvited with food"],
+  plot:["Vera Wong, a lonely widow, comes downstairs one morning to find a dead man on the floor of her teahouse, a flash drive in his hand. She pockets the drive, calls the police, and decides Officer Gray is wrong to call it a natural death.",
+   "The dead man is Marshall Chen. Four people soon come to the shop: Riki and Sana, who pose as people investigating the death; Oliver, Marshall's twin; and Julia, Marshall's widow, with her daughter Emma. Vera treats all four as suspects and as children who need feeding, tea and advice, and gets deeper into their lives.",
+   "Each suspect has something to hide: Riki built the bot behind Marshall's NFT scheme, Sana has her own score to settle, Oliver has written a novel that reads like a motive, and Julia stands to gain from Marshall's death. Officer Gray grows more interested after finding Oliver's draft.",
+   "The killer is Alex Chen, Vera's loyal customer and Marshall and Oliver's father. Learning that Marshall planned to abandon Julia and Emma, he poisoned him with tea that exploited Marshall's allergy. Vera ends up with a found family, and the teahouse becomes a gathering place."],
+  fun:["The teahouse name is a joke on wedding-dress designer Vera Wang; Vera spells it that way on purpose.","Sutanto is a Chinese-Indonesian writer who lives in Jakarta. She studied at UC Berkeley and earned an MFA at Oxford.","Her novel Dial A for Aunties made her the first writer of colour to win the UK's Comedy Women in Print Prize, and Netflix optioned it.","She won an Edgar Award in 2024.","Warner Bros. TV acquired the book for a series, with Mindy Kaling's and Oprah Winfrey's production companies attached.","A sequel, Vera Wong's Guide to Snooping (on a Dead Man), came out in 2025."]},
+ star:{t:"Starling House",a:"Alix E. Harrow",c:"--b5",
+  titleAlts:["starling house"],shortAlts:["starling"],authorAlts:["alix e harrow","alix harrow"],
+  facts:[["Published","October 2023"],["Publisher","Tor"],["Length","About 320 pages"],["Genre","Southern Gothic fantasy"],["Narration","Mostly Opal, with Arthur's chapters"],["Club pick","Reese's Book Club"]],
+  cast:[["Opal","26; lives at the Garden of Eden Motel and works at Tractor Supply; becomes Arthur's housekeeper to pay for her brother's schooling; later the Warden"],["Jasper","Opal's brother, 16; has asthma, excels at school, makes artistic videos"],["Arthur Starling","28; reclusive heir and Warden of Starling House; researches the Beasts and practices with a sword"],["Eleanor Starling","The house's first resident and, as E. Starling, author of the children's book The Underland; briefly married John Gravely"],["Jewell","Opal and Jasper's late mother; lived on favors, invented new family surnames, died in the Mud River"],["Bev","Gruff owner of the Garden of Eden Motel; lets the siblings stay free in room 12; Charlotte's partner"],["Charlotte","Eden's librarian, who digs up documents and recordings that challenge the town's official history"],["Elizabeth Baine","Polished Gravely Power representative who coerces Opal into spying on Arthur"],["Don Gravely","Owner of Gravely Power"],["Constable Mayhew","Local lawman who sides with Gravely Power"],["Lacey","Opal's coworker at Tractor Supply, who spreads rumors about the house"],["John Gravely","One of the three Gravely brothers who founded Eden's coal empire; Eleanor's husband"],["Nathaniel Boone","Man enslaved in the Gravely mines who, in alternate lore, warned Eleanor about the cracks beneath Eden"],["Calliope Boone","His descendant, who keeps her family's alternate history of Eden"],["Baast","The bad-tempered stray cat Opal rescues and calls \"the hellcat\""],["The Beasts","Creatures of the Underland that the Warden holds back"]],
+  places:["Eden, Kentucky, a dying coal town","Starling House, the shifting, half-alive mansion behind its gates","The Garden of Eden Motel, room 12","The Tractor Supply store where Opal works","The Eden public library","The Mud River, where Opal's mother died","Stonewood Academy, the school Opal wants for Jasper","The Underland, the dream world beneath the house"],
+  plot:["Opal works dead-end jobs in Eden, Kentucky, and saves every dollar to send her brother Jasper to Stonewood Academy. Their mother died years ago when her car went into the Mud River, a crash Opal survived. Since childhood Opal has been fascinated by The Underland, by Eden's one famous author, E. Starling, and by the house she left behind. She dreams of it nightly.",
+   "When the gates open for her, the hostile heir Arthur Starling surprisingly hires her as a housekeeper. Inside are rotting rooms, carvings and portraits of past Wardens, each with the same sword. Arthur is the Warden, holding back Beasts from the Underland. Opal steals small things to sell, and the house seems to watch her.",
+   "Elizabeth Baine of Gravely Power pays and threatens Opal to spy on Arthur and photograph the house. Opal pretends to agree but protects him. Charlotte's research and the Boone family history reveal a hidden past: the Gravelys used enslaved labor in their mines. Arthur confesses that a Beast that escaped while he neglected his duty caused Opal's mother's crash, and Opal learns her family's true surname is Gravely. Baine burns down the motel to frame Opal, and Arthur signs over Starling House to keep her out of prison.",
+   "Opal follows Arthur into the Underland and confronts Eleanor Starling, who dreamed the Beasts into being out of rage at the Gravely brothers. Opal reshapes the dream with her own memories, lets Eleanor rest, frees Arthur from his endless fight, and becomes Warden herself. A coal ash spill hits Eden, and Opal and Arthur settle into a repaired Starling House together."],
+  fun:["Harrow grew up in Kentucky and now lives in Charlottesville, Virginia. Bruce Holsinger, author of Culpability, also lives there.","Her debut was The Ten Thousand Doors of January, followed by The Once and Future Witches and the fairy-tale novellas A Spindle Splintered and A Mirror Mended.","She won a Hugo Award for her short story \"A Witch's Guide to Escape.\"","The novel uses footnotes and includes illustrations and a bibliography, as if it were a history of Eden.","Cross-book traps: Opal's coworker is named Lacey (like Culpability's detective), and in The Wilderness, January's partner is Morris Starling.","Starling House was a Reese's Book Club pick."]},
+ wild:{t:"The Wilderness",a:"Angela Flournoy",c:"--b6",
+  titleAlts:["wilderness"],shortAlts:[],authorAlts:["angela flournoy"],
+  facts:[["Published","September 16, 2025"],["Publisher","Mariner"],["Length","About 304 pages"],["Genre","Literary fiction"],["Spans","2008 to about 2027"],["Honors","National Book Award longlist; Kirkus Prize finalist"]],
+  cast:[["Desiree Richard","Caregiver for her grandfather; inherits a small fortune from his secret rental properties; the emotional center of the group"],["Nolan Richard","Desiree's grandfather; diabetic, on dialysis; plans an assisted death in Zurich through Eternus; dies on the train"],["Danielle Joyner","Desiree's older sister; a medical resident in Cleveland, later married with twin daughters in Washington, D.C.; once dated Chika"],["Sherelle","Desiree and Danielle's late mother"],["Terry Joyner","Danielle's father, whom she meets in 2027; claims Nolan hid his child support"],["January Wells","Leaves her boyfriend while pregnant; later has a second son and severe postpartum depression"],["Morris Starling","January's partner and the father of her sons"],["Bronze and Brook","January's sons"],["Nakia Washington","Desiree's closest friend; runs Safe House Café in Los Angeles; fatally injured during the Bunker Hill Uprisings"],["Jay","Nakia's partner; on the board of the speaker series Tru Talk"],["Miguel","Head chef at Safe House Café"],["Reina","Guatemalan cook with whom Nakia has a secret relationship"],["Monique L.","Librarian on a university committee about former slave quarters; goes viral online and later leaves the U.S."],["Nnamdi Watson","Professor on that committee who resists erasing the history of enslavement"],["Chika","Doctor and friend of Morris; Desiree has an affair with him"],["Dale","Morris's friend who gropes Nakia at a club"],["Arielle and L.","Friends with Nakia on the Sixth Street Bridge"]],
+  places:["Los Angeles: Nolan's Leimert Park house, Safe House Café, Nakia and Jay's home, the Sixth Street Bridge","Paris: Charles de Gaulle airport, a small hotel, the Tuileries Garden, a red door in Montparnasse","The train to Zurich","Harlem, New York: January's studio and a nightclub","Cleveland and Washington, D.C., where Danielle lives","Chicago, where Nakia is a finalist for a culinary award","California suburbs, where January struggles after Brook's birth"],
+  plot:["In 2008 Desiree flies with her grandfather Nolan from Los Angeles to Paris, a stop before Zurich, where he has arranged an assisted death through an organization called Eternus. In Paris he visits the Tuileries, stares at a red door in Montparnasse he won't enter, and hints that he may have fathered a child in France. On the train to Zurich he dies in his seat before the procedure.",
+   "Desiree inherits a small fortune from Nolan's secret rental properties. She and her sister Danielle, a doctor, grow estranged, worsened when Danielle learns of Desiree's affair with Chika, a man Danielle once dated. Desiree moves to New York to live with Nakia; at a club, Morris's friend Dale gropes Nakia, and she moves back to Los Angeles and opens Safe House Café.",
+   "In 2018 January, pregnant and separated from Morris, drafts a letter in Harlem asking him to give up his parental rights, and laughs at a Harriet Tubman statue wearing a pink hat. Later, after her second son, Desiree finds her in severe distress in California. Monique turns from librarian to online star. At a 2022 dinner, Monique argues the housed will eventually turn violently on the unhoused. In 2024 the friends meet in Chicago, where Nakia is a culinary-award finalist and doesn't win.",
+   "In 2027 Danielle meets her father, Terry. On the train home she calls Nakia for Desiree's number, and Jay answers: Nakia is dead. During the Bunker Hill Uprisings, police had kettled Nakia and other protesters onto the Sixth Street Bridge, a National Guard helicopter doused them with water, and she was hit by rubber bullets and died of her injuries. Desiree resolves to reconnect with Danielle for Nakia's sake, January moves into Nakia's house with her sons, and the novel ends with the sisters meeting in a park in Washington, D.C., while Danielle's daughters wait to meet their aunt."],
+  fun:["Flournoy's debut, The Turner House, was a National Book Award finalist in 2015.","She was raised in Southern California by a mother from Los Angeles and a father from Detroit.","The Wilderness was longlisted for the 2025 National Book Award and was a 2025 Kirkus Prize finalist.","The audiobook is read by Flournoy with actors Aja Naomi King and Ashley Nicole Black.","Monique's story is told partly through her blog posts.","Cross-book trap: January's partner is Morris Starling, but he has nothing to do with Starling House."]}
+};
+
+// "In which book" clues: [book, statement]
+const IWB = [
+["tb","the author first mistakes a 17-year-old patient for a young child"],
+["tb","a trip to study maternal health in Sierra Leone changes the author's direction"],
+["tb","Arthur Conan Doyle goes to see a scientist's promised cure and comes away doubtful"],
+["tb","John Keats's autopsy is described"],
+["tb","a mother named Isatu visits her son in the hospital nearly every day"],
+["tb","an Indian activist fights for access to a costly drug"],
+["cul","a self-driving minivan crashes while a teenager is supposed to be monitoring it"],
+["cul","a lacrosse player's scholarship to UNC is put at risk"],
+["cul","a mother with a MacArthur \"genius grant\" studies the ethics of AI"],
+["cul","a teenager's online friend Blair turns out to be a chatbot"],
+["cul","a tech billionaire's bayside estate has a helipad and armed security"],
+["cul","a 10-year-old confesses that her texts distracted her brother"],
+["lion","two girls vow to grow up to be \"lion women\""],
+["lion","a smell of tobacco at a New York perfume counter brings back memories"],
+["lion","an offhand remark to a colonel gets a best friend arrested"],
+["lion","a husband dies in the Cinema Rex fire"],
+["lion","a girl's father dies of tuberculosis"],
+["lion","a mother blames her bad luck on the evil eye"],
+["lion","a grandmother appears in footage of the 2022 protests after Mahsa Amini's death"],
+["vera","a 60-year-old widow finds a dead man on her shop floor"],
+["vera","a mother sends her adult son, Tilly, constant unsolicited advice"],
+["vera","the sleuth pockets a flash drive from a dead man's hand"],
+["vera","a twin writes a novel suspiciously close to his brother's life"],
+["vera","the killer is the sleuth's only regular customer"],
+["vera","a father poisons his own son with tea"],
+["star","a young woman takes a job cleaning the most feared house in town"],
+["star","a 19th-century author vanished after writing The Underland"],
+["star","a man called the Warden fights monsters with a sword"],
+["star","a corporate fixer burns down a motel to frame the heroine"],
+["star","a heroine adopts a bad-tempered stray cat she calls \"the hellcat\""],
+["star","a mother died when her car went into the Mud River"],
+["wild","a woman takes her grandfather to Paris on the way to an assisted death in Zurich"],
+["wild","an old man stares at a red door in Montparnasse but won't go in"],
+["wild","a pregnant woman drafts a letter asking her partner to give up parental rights"],
+["wild","a librarian goes viral and becomes an online star"],
+["wild","a chef runs a restaurant called Safe House Café"],
+["wild","police kettle protesters on the Sixth Street Bridge"],
+];
+
+// Content: [book, sentence with ___, answer, [accepted alternates], [3 wrong options]]
+const CONTENT = [
+["tb","John Green met Henry at ___ Government Hospital in Sierra Leone.","Lakka",[],["Connaught","Kenema","Bo"]],
+["tb","The young patient at the center of the book is named Henry ___.","Reider",["rieder"],["Kamara","Koroma","Sesay"]],
+["tb","Henry's mother, who visits him nearly every day, is named ___.","Isatu",[],["Favor","Aminata","Fatmata"]],
+["tb","Henry's sister ___ died of a cyst blocking her airway.","Favor",["favour"],["Isatu","Grace","Mariama"]],
+["tb","In 1882, ___ identified the bacterium that causes tuberculosis.","Robert Koch",["koch"],["Louis Pasteur","Joseph Lister","Paul Ehrlich"]],
+["tb","Koch's failed \"cure\" for TB was called ___.","tuberculin",[],["bedaquiline","streptomycin","penicillin"]],
+["tb","The French scientist whose anthrax vaccine put pressure on Koch was ___.","Louis Pasteur",["pasteur"],["Marie Curie","Joseph Lister","Edward Jenner"]],
+["tb","The Sherlock Holmes author who doubted Koch's cure was ___.","Arthur Conan Doyle",["conan doyle","doyle","sir arthur conan doyle"],["Charles Dickens","Robert Louis Stevenson","Wilkie Collins"]],
+["tb","The Romantic poet whose autopsy found his lungs almost entirely destroyed was John ___.","Keats",["john keats"],["Shelley","Byron","Wordsworth"]],
+["tb","The TB doctor treating Henry in Sierra Leone is Dr. Girum ___.","Tefera",[],["Reider","Farmer","Kamara"]],
+["tb","The drug for drug-resistant TB that the book says is priced out of reach is ___.","bedaquiline",[],["tuberculin","insulin","penicillin"]],
+["tb","Shreya Tripathi fought for access to bedaquiline in ___.","India",[],["Sierra Leone","Kenya","Brazil"]],
+["tb","Partners In Health's successful drug-resistant TB program is highlighted in ___.","Peru",[],["India","Brazil","Kenya"]],
+["tb","Henry was ___ years old when Green met him.","17",["seventeen"],["12","14","21"]],
+["tb","Green first went to Sierra Leone to learn about ___ health care.","maternal",["maternal and neonatal","maternal and newborn","maternal health"],["HIV","malaria","cancer"]],
+["tb","Treatment centers where TB patients rested in fresh air were called ___.","sanatoriums",["sanatoria","sanitariums","sanatorium","sanitarium"],["asylums","almshouses","workhouses"]],
+["tb","Everything Is Tuberculosis was published by ___ Books, named for Green's educational video series.","Crash Course",[],["Vlogbrothers","Nerdfighter","Anthropocene"]],
+["tb","In 2023, Green spoke at the ___ to push for cheaper TB drugs and tests.","United Nations",["un","the un","the united nations"],["White House","U.S. Senate","Vatican"]],
+
+["cul","The family's self-driving minivan is a ___.","SensTrek",["sens trek"],["AutoSense","DriveLine","OmniCar"]],
+["cul","Lorelei consulted for Monet on an algorithm for ___, the company behind the van's operating system.","NaviTech",["navi tech"],["AutoSense","DriveLine","OmniCar"]],
+["cul","Alice's online confidant, who turns out to be a chatbot, is named ___.","Blair",[],["Emma","Dissee","Calla"]],
+["cul","The elderly couple killed in the other car are Phil and Judith ___.","Drummond",[],["Monet","Ramsay","Morrissey"]],
+["cul","Charlie jerks the wheel when ___ screams.","Alice",[],["Izzy","Lorelei","Dissee"]],
+["cul","The family was driving to Charlie's ___ tournament.","lacrosse",[],["soccer","swim","baseball"]],
+["cul","Charlie has a lacrosse scholarship to ___.","UNC",["north carolina","university of north carolina","unc chapel hill"],["Duke","Virginia","Johns Hopkins"]],
+["cul","Lorelei is an AI ethicist who has won a ___ \"genius grant.\"","MacArthur",[],["Guggenheim","Rhodes","Fulbright"]],
+["cul","Noah, the narrator, works as a ___.","lawyer",["attorney","corporate lawyer"],["surgeon","engineer","professor"]],
+["cul","Lorelei kept her own last name: Lorelei ___.","Shaw",[],["Monet","Morrissey","Drummond"]],
+["cul","Alice is 13, and Izzy is ___.","10",["ten"],["7","12","15"]],
+["cul","The detective investigating the crash is Lacey ___.","Morrisey",["morrissey"],["Drummond","Ramsay","Gray"]],
+["cul","The detective works for the ___ State Police.","Delaware",[],["Maryland","Virginia","Pennsylvania"]],
+["cul","Blair is a chatbot from an app called ___.","AvaPal",["ava pal"],["SensTrek","NaviTech","ChatMate"]],
+["cul","Lorelei's sister Julia works as a ___.","lawyer",["attorney"],["doctor","therapist","reporter"]],
+["cul","The tech billionaire with the estate next door is Daniel ___.","Monet",[],["Ramsay","Gravely","Drummond"]],
+["cul","Monet's daughter Eurydice goes by the nickname ___.","Dissee",["dissie","dissy"],["Izzy","Edie","Blair"]],
+["cul","The sibling who was texting Charlie just before the crash was ___.","Izzy",[],["Alice","Dissee","Emma"]],
+["cul","The family spends the summer in a rental house on the ___ Bay.","Chesapeake",[],["Narragansett","Monterey","Tampa"]],
+["cul","Noah hires a lawyer for Charlie named Evan ___ III.","Ramsay",["ramsey"],["Morrissey","Monet","Drummond"]],
+["cul","Monet adapted Lorelei's algorithm for use by the ___.","Army",["us army","military","the army","the military"],["CIA","police","Navy"]],
+["cul","Culpability was the July 2025 pick of ___'s Book Club.","Oprah",["oprah winfrey","oprahs"],["Reese","Jenna","Read with Jenna"]],
+
+["lion","Ellie's father dies when she is ___ years old.","7",["seven"],["5","10","12"]],
+["lion","Ellie's father dies of ___.","tuberculosis",["tb","consumption"],["cancer","a heart attack","typhoid"]],
+["lion","Homa wants to study law and become a ___.","judge",[],["doctor","diplomat","journalist"]],
+["lion","Ellie's mother marries Ellie's uncle, ___.","Massoud",["masoud"],["Mehrdad","Abdol","Reza"]],
+["lion","Homa's warm, welcoming mother is named ___.","Monir",[],["Sousan","Niloo","Afarin"]],
+["lion","Ellie marries ___.","Mehrdad",[],["Abdol","Massoud","Reza"]],
+["lion","Mehrdad studies ___.","chemistry",[],["medicine","law","engineering"]],
+["lion","Homa marries ___.","Abdol",[],["Mehrdad","Massoud","Reza"]],
+["lion","Abdol works at a ___.","garage",["car garage","auto garage"],["bakery","bank","bazaar stall"]],
+["lion","Homa's daughter is named ___.","Bahar",[],["Leily","Sousan","Niloo"]],
+["lion","Homa's granddaughter, to whom she writes a letter, is named ___.","Leily",["leili","leyli"],["Bahar","Afarin","Niloo"]],
+["lion","Homa's father was imprisoned after the ___ coup.","1953",[],["1963","1979","1941"]],
+["lion","The Colonel Ellie talks to works for the secret police known as ___.","SAVAK",[],["KGB","Basij","Mossad"]],
+["lion","The Colonel is the husband of Ellie's friend ___.","Sousan",["susan"],["Niloo","Afarin","Bahar"]],
+["lion","Abdol dies in the Cinema ___ fire in Abadan.","Rex",[],["Royal","Capitol","Pars"]],
+["lion","In 1981, Ellie works at a ___ counter in New York.","perfume",["fragrance"],["jewelry","bakery","hat"]],
+["lion","At a party, Ellie grows jealous when Homa offers Mehrdad a taste of ___.","soup",[],["tea","cake","wine"]],
+["lion","At Tehran University, Ellie studies ___.","English",["english literature"],["law","medicine","French"]],
+["lion","At university, Homa joins the ___ student group.","communist",[],["monarchist","religious","royalist"]],
+["lion","By 2022, Ellie owns a Persian café in ___.","Massachusetts",[],["New York","California","Maryland"]],
+["lion","Ellie gets a letter from Homa after a silence of ___ years.","17",["seventeen"],["10","20","25"]],
+["lion","Bahar is hospitalized in New York for ___ after a party.","alcohol poisoning",["alcohol","drinking"],["a broken leg","food poisoning","a car accident"]],
+
+["vera","Vera's shop is called Vera ___'s World-Famous Teahouse.","Wang",[],["Wong","Chen","Lee"]],
+["vera","The teahouse is in San Francisco's ___.","Chinatown",["china town"],["Mission District","Sunset District","Japantown"]],
+["vera","Vera's adult son, who gets her texts, is named ___.","Tilly",[],["Oliver","Riki","Alex"]],
+["vera","The murder victim is Marshall ___.","Chen",[],["Wong","Gray","Lim"]],
+["vera","Vera takes a ___ from the dead man's hand.","flash drive",["usb","usb drive","thumb drive","usb stick"],["phone","key","teacup"]],
+["vera","Oliver is Marshall's ___ brother.","twin",["identical twin"],["younger","half","step"]],
+["vera","Marshall's widow is named ___.","Julia",[],["Sana","Emma","Selena"]],
+["vera","Julia's young daughter is named ___.","Emma",[],["Julia","Sana","Tilly"]],
+["vera","The officer on the case is Officer ___.","Gray",["grey"],["Morrissey","Chen","Wong"]],
+["vera","Marshall hired Riki to build a bot to manipulate the ___ market.","NFT",["nfts"],["stock","real estate","sneaker"]],
+["vera","Sana is a struggling ___.","artist",["painter"],["photographer","writer","programmer"]],
+["vera","Oliver is writing a ___ that seems to mirror his brother's life.","novel",["book"],["screenplay","memoir","podcast"]],
+["vera","The killer, Alex Chen, turns out to be Marshall's ___.","father",["dad"],["uncle","business partner","landlord"]],
+["vera","Alex kills Marshall with a cup of ___ that exploits his allergy.","tea",[],["coffee","soup","wine"]],
+["vera","Alex had told Vera his wife has ___, but she died long ago.","Alzheimer's",["alzheimers","dementia"],["cancer","Parkinson's","diabetes"]],
+["vera","Vera is ___ years old.","60",["sixty"],["55","65","70"]],
+["vera","Marshall pushed Julia out of ___ school.","photography",["photo"],["law","art","nursing"]],
+
+["star","The story is set in Eden, ___.","Kentucky",[],["West Virginia","Tennessee","Ohio"]],
+["star","Opal's younger brother is named ___.","Jasper",[],["Arthur","Charlie","Henry"]],
+["star","The reclusive heir of the house is Arthur ___.","Starling",[],["Gravely","Baine","Boone"]],
+["star","E. Starling's famous book is called The ___.","Underland",[],["Otherworld","Undertow","Deepwood"]],
+["star","Arthur holds the title of ___ of Starling House.","Warden",[],["Keeper","Master","Guardian"]],
+["star","The monsters that come up from the Underland are called ___.","Beasts",["the beasts","beast"],["Shades","Hollows","Wights"]],
+["star","The company that dominates Eden is ___ Power.","Gravely",[],["Starling","Boone","Bluegrass"]],
+["star","The Gravely Power fixer who pressures Opal is Elizabeth ___.","Baine",["bane"],["Gravely","Boone","Mayhew"]],
+["star","Opal is saving to send Jasper to ___ Academy.","Stonewood",[],["Gravely","Bluegrass","Riverside"]],
+["star","Opal and Jasper live in room 12 of the Garden of ___ Motel.","Eden",[],["Paradise","Bluegrass","Starlight"]],
+["star","Opal's late mother is named ___.","Jewell",["jewel"],["Eleanor","Charlotte","Bev"]],
+["star","Opal's mother died when her car went into the ___ River.","Mud",[],["Green","Ohio","Kentucky"]],
+["star","Opal's bad-tempered rescue cat is named ___.","Baast",["bast"],["Baby","Jinx","Hellion"]],
+["star","Opal works at a ___ store.","Tractor Supply",["tractor supply co"],["Dollar General","Walmart","Kroger"]],
+["star","The house was built by ___ Starling.","Eleanor",[],["Elizabeth","Edith","Evelyn"]],
+["star","Eleanor Starling was briefly married to John ___.","Gravely",[],["Boone","Baine","Mayhew"]],
+["star","Bev runs the ___ where Opal and Jasper live.","motel",[],["diner","boarding house","trailer park"]],
+["star","Charlotte is the town's ___.","librarian",[],["lawyer","sheriff","teacher"]],
+["star","Arthur fights the Beasts with a ___.","sword",[],["shotgun","axe","torch"]],
+["star","Arthur hires Opal as a ___.","housekeeper",["cleaner","maid","house keeper"],["gardener","tutor","cook"]],
+["star","Eden's wealth and its poison both come from ___ mining.","coal",[],["silver","copper","iron"]],
+["star","To keep Opal out of prison, Arthur signs over ___.","Starling House",["the house","his house"],["his inheritance","the sword","the Underland"]],
+
+["wild","Desiree's grandfather is named ___.","Nolan",[],["Terry","Morris","Conrad"]],
+["wild","Nolan has arranged an assisted death in ___.","Zurich",["zürich"],["Paris","Geneva","Amsterdam"]],
+["wild","Nolan's assisted death is arranged through an organization called ___.","Eternus",[],["Dignitas","Exit","Lifeline"]],
+["wild","On the way to Zurich, Desiree and Nolan stop in ___.","Paris",[],["London","Rome","Berlin"]],
+["wild","Nolan dies on a ___ before reaching the clinic.","train",[],["plane","boat","bus"]],
+["wild","In Montparnasse, Nolan stares at a building with a ___ door.","red",[],["blue","green","black"]],
+["wild","Desiree's estranged older sister is named ___.","Danielle",[],["Sherelle","Monique","January"]],
+["wild","Desiree and Danielle's late mother is named ___.","Sherelle",["sherrelle","sherell"],["Juanita","Beverly","Octavia"]],
+["wild","Desiree has an affair with ___, a doctor her sister once dated.","Chika",[],["Dale","Morris","Jay"]],
+["wild","Nolan's house is in Leimert Park in ___.","Los Angeles",["la","l a"],["Harlem","Cleveland","Chicago"]],
+["wild","Nakia's restaurant is called ___.","Safe House Café",["safe house","safe house cafe","safehouse cafe","safehouse"],["The Group of 7","Bunker Hill Café","Leimert Kitchen"]],
+["wild","Nakia's partner is named ___.","Jay",[],["Reina","Morris","Chika"]],
+["wild","January's partner is Morris ___.","Starling",[],["Wells","Joyner","Richard"]],
+["wild","January's sons are Bronze and ___.","Brook",["brooke"],["Rico","Kyle","Terry"]],
+["wild","Monique is a librarian who goes viral as an online ___.","influencer",["star","personality"],["chef","novelist","politician"]],
+["wild","In 2024 the friends meet in ___, where Nakia is a finalist for a culinary award.","Chicago",[],["New Orleans","Atlanta","Paris"]],
+["wild","Nakia is fatally injured during the ___ Hill Uprisings in Los Angeles.","Bunker",[],["Signal","Baldwin","Chavez"]],
+["wild","Police kettle Nakia and other protesters onto the ___ Street Bridge.","Sixth",["6th"],["First","Fourth","Seventh"]],
+["wild","Danielle's father is Terry ___.","Joyner",[],["Richard","Wells","Washington"]],
+["wild","In 2018, January laughs at a statue of ___ wearing a pink hat.","Harriet Tubman",["tubman"],["Frederick Douglass","Sojourner Truth","Rosa Parks"]],
+["wild","The novel ends with Desiree and Danielle meeting in a park in ___.","Washington, D.C.",["washington","dc","washington dc","d c"],["Los Angeles","Cleveland","Paris"]],
+];
+
+
+// Crossovers: [books, predicate, 3 wrong book sets, note]
+const XB = [
+[["cul","star"],"have a character named Lacey",[["cul","wild"],["star","vera"],["lion","star"]],"Detective Lacey Morrisey in Culpability; Opal's Tractor Supply coworker in Starling House."],
+[["vera","cul"],"have a character named Julia",[["vera","wild"],["cul","lion"],["star","vera"]],"Julia Chen, Marshall's widow, in Vera Wong; Julia, Lorelei's lawyer sister, in Culpability."],
+[["star","wild"],"have a character with the last name Starling",[["star","cul"],["star","lion"],["wild","vera"]],"Arthur and Eleanor Starling in Starling House; January's partner Morris Starling in The Wilderness."],
+[["tb","lion"],"include a death from tuberculosis",[["tb","wild"],["tb","star"],["lion","wild"]],"TB is the subject of John Green's book; Ellie's father dies of it in 1950 in The Lion Women of Tehran."],
+[["cul","vera"],"feature a computer bot that matters to the plot",[["cul","wild"],["vera","tb"],["cul","star"]],"Blair, Alice's AvaPal chatbot, in Culpability; Riki's NFT scraper bot in Vera Wong."],
+[["star","wild"],"have a librarian as a character",[["star","lion"],["wild","vera"],["star","tb"]],"Charlotte in Starling House; Monique, a librarian turned online star, in The Wilderness."],
+[["cul","lion"],"feature a woman who is a lawyer or wants to become one",[["cul","wild"],["lion","vera"],["cul","vera"]],"Julia, Lorelei's sister, is a lawyer in Culpability; Homa wants to study law and become a judge."],
+[["tb","wild"],"have a doctor as a significant character",[["tb","cul"],["wild","lion"],["tb","vera"]],"Dr. Girum Tefera in Everything Is Tuberculosis; Danielle and Chika in The Wilderness."],
+[["lion","vera","wild"],"have a woman who runs a café or teahouse",[["lion","vera","cul"],["vera","wild","star"],["lion","wild","tb"]],"Ellie's Persian café, Vera's teahouse, and Nakia's Safe House Café."],
+[["vera","wild"],"are set largely in California",[["vera","cul"],["wild","lion"],["vera","star"]],"San Francisco's Chinatown in Vera Wong; Los Angeles in The Wilderness."],
+[["lion","wild"],"have main characters who live in New York",[["lion","vera"],["wild","cul"],["lion","tb"]],"Ellie and Mehrdad move to New York; Desiree and January live in New York in The Wilderness."],
+[["lion","star"],"include an arson fire",[["lion","wild"],["star","cul"],["star","vera"]],"The Cinema Rex fire in Abadan was an arson attack; Elizabeth Baine burns down the Garden of Eden Motel."],
+[["cul","star"],"turn on a car crash that a child survives",[["cul","wild"],["star","lion"],["cul","tb"]],"The SensTrek crash in Culpability; the crash into the Mud River that killed Opal's mother, which Opal survived."],
+[["lion","wild"],"include street protests",[["lion","cul"],["wild","star"],["lion","vera"]],"Iran's revolution and the 2022 Mahsa Amini protests; the Bunker Hill Uprisings and the 2018 pink-hat marches in The Wilderness."],
+[["tb","cul"],"have a 17-year-old boy in the hospital",[["tb","star"],["cul","vera"],["tb","lion"]],"Henry Reider in Everything Is Tuberculosis; Charlie after the crash in Culpability."],
+[["vera","wild"],"have twins in a family",[["vera","cul"],["wild","star"],["vera","lion"]],"Marshall and Oliver Chen are twins; Danielle has twin daughters in The Wilderness."],
+[["vera","lion"],"have a widow as a main character",[["vera","star"],["lion","cul"],["vera","wild"]],"Vera and Julia are widows; Homa is widowed when Abdol dies in the Cinema Rex fire."],
+[["cul","vera"],"have a police officer investigating a death",[["cul","star"],["vera","wild"],["cul","tb"]],"Det. Lacey Morrisey in Culpability; Officer Gray in Vera Wong."],
+[["cul","wild"],"feature a helicopter at a key moment",[["cul","lion"],["wild","star"],["cul","vera"]],"Monet arrives at his estate by helicopter in Culpability; a National Guard helicopter douses protesters in The Wilderness."],
+[["lion","wild"],"have scenes set in 2022",[["lion","tb"],["wild","cul"],["lion","star"]],"The Mahsa Amini protests in The Lion Women of Tehran; Nakia and Jay's dinner party in The Wilderness."],
+[["vera","star"],"were published in 2023",[["vera","lion"],["star","tb"],["star","cul"]],"Vera Wong (March 2023) and Starling House (October 2023)."],
+[["tb","cul","wild"],"were published in 2025",[["tb","cul","lion"],["cul","wild","vera"],["tb","wild","star"]],"Everything Is Tuberculosis (March), Culpability (July) and The Wilderness (September)."],
+[["cul","vera"],"have a connection to Oprah Winfrey",[["cul","star"],["vera","lion"],["cul","wild"]],"Culpability was her July 2025 book club pick; her Harpo Films is producing the Vera Wong TV series."],
+[["cul","star"],"are by authors who live in Charlottesville, Virginia",[["cul","wild"],["star","tb"],["cul","lion"]],"Bruce Holsinger and Alix E. Harrow."],
+[["lion","vera"],"are by authors who studied at UC Berkeley",[["lion","wild"],["vera","star"],["lion","cul"]],"Marjan Kamali and Jesse Q. Sutanto."],
+[["tb","wild"],"have audiobooks read by their own authors",[["tb","cul"],["wild","lion"],["tb","vera"]],"John Green reads his book; Angela Flournoy reads The Wilderness with two actors."],
+];
+// Crossover facts: [books, sentence with ___, answer, alternates, 3 wrong options, note]
+const XT = [
+[["lion","tb"],"Ellie's father in The Lion Women of Tehran dies of the disease that is the subject of the book by ___.","John Green",["green"],["Bruce Holsinger","Angela Flournoy","Alix E. Harrow"],"Everything Is Tuberculosis."],
+[["lion"],"Bahar arrives in America in 1982, the same year her author settled in the U.S. That author is ___.","Marjan Kamali",["kamali"],["Jesse Q. Sutanto","Angela Flournoy","Alix E. Harrow"],"Kamali, born in Turkey to Iranian parents, settled in the U.S. in 1982."],
+[["lion","vera"],"Vera Wong runs a teahouse, but the author who wrote a novel called Together Tea is ___.","Marjan Kamali",["kamali"],["Jesse Q. Sutanto","Bruce Holsinger","John Green"],"Kamali's first novel was Together Tea (2013)."],
+[["tb","cul","star"],"Henry Reider and Charlie are both ___ years old; Jasper in Starling House is a year younger.","17",["seventeen"],["15","16","18"],"Henry is 17 when Green meets him; Charlie is 17 at the crash; Jasper is 16."],
+[["star","cul"],"Opal's coworker in Starling House and the detective in Culpability share the first name ___.","Lacey",["lacy"],["Julia","Emma","Charlotte"],"Lacey Morrisey and Opal's coworker Lacey."],
+[["vera","cul"],"Marshall's widow in Vera Wong and Lorelei's sister in Culpability share the first name ___.","Julia",[],["Emma","Lacey","Sana"],"Julia Chen and Julia, Lorelei's lawyer sister."],
+[["wild","star"],"January's partner in The Wilderness is Morris ___, the same surname as Arthur in another book.","Starling",[],["Gravely","Monet","Chen"],"Morris Starling; Arthur Starling."],
+[["star","cul"],"Bruce Holsinger and Alix E. Harrow both live in ___, Virginia.","Charlottesville",[],["Richmond","Roanoke","Alexandria"],"Holsinger teaches at the University of Virginia there."],
+[["lion","vera"],"Marjan Kamali and Jesse Q. Sutanto both studied at ___.","UC Berkeley",["berkeley","university of california berkeley","cal","uc berkley"],["Oxford","Columbia","NYU"],"Watch the traps: Sutanto also went to Oxford, and Kamali to Columbia and NYU."],
+[["cul","vera"],"Oprah's ___ Films is producing the Vera Wong series, and she picked Culpability for her book club.","Harpo",[],["Oxygen","OWN","Hello Sunshine"],"Hello Sunshine is Reese Witherspoon's company."],
+[["star","cul"],"Starling House was a pick of ___'s Book Club, while Culpability was Oprah's.","Reese",["reese witherspoon","reeses"],["Jenna","Oprah","Hoda"],"Reese Witherspoon's book club."],
+[["lion","wild"],"In 2022, Homa appears in footage of protests in Iran, and in The Wilderness, Monique argues at a 2022 dinner that the housed will turn on the ___.","unhoused",["homeless","the unhoused","the homeless"],["poor","young","police"],"Both books have scenes set in 2022."],
+];
+const KW={tb:["everything is tuberculosis","tuberculosis","tb","green"],cul:["culpability","holsinger"],lion:["lion women","lion","tehran","kamali"],vera:["vera wong","vera","sutanto","murderers"],star:["starling house","starling","harrow"],wild:["wilderness","flournoy"]};
+function names(keys){const t=keys.map(k=>BOOKS[k].t);return t.length<3?t.join(" and "):t.slice(0,-1).join(", ")+" and "+t[t.length-1]}
+function findBooks(input){const x=" "+norm(input)+" ";return KEYS.filter(k=>KW[k].some(w=>x.includes(" "+w+" ")))}
+
+// ---------- item bank
+const ITEMS=[];
+IWB.forEach((r,i)=>ITEMS.push({id:"i"+i,book:r[0],kind:"iwb",stmt:r[1]}));
+CONTENT.forEach((r,i)=>ITEMS.push({id:"c"+i,book:r[0],kind:"content",s:r[1],a:r[2],alts:r[3],d:r[4]}));
+XB.forEach((r,i)=>ITEMS.push({id:"x"+i,books:r[0],kind:"cross",sub:"books",pred:r[1],d:r[2],note:r[3]}));
+XT.forEach((r,i)=>ITEMS.push({id:"y"+i,books:r[0],kind:"cross",sub:"text",s:r[1],a:r[2],alts:r[3],d:r[4],note:r[5]}));
+const KEYS=Object.keys(BOOKS);
+
+const STORE="bbp-results-v4";
+let res={};
+try{res=JSON.parse(localStorage.getItem(STORE)||"{}")||{}}catch(e){res={}}
+function save(){try{localStorage.setItem(STORE,JSON.stringify(res))}catch(e){}}
+
+// ---------- helpers
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function norm(s){return String(s).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/&/g," and ").replace(/['’`]/g,"").replace(/[^a-z0-9]+/g," ").trim().replace(/^(the|a|an) /,"").replace(/\s+/g," ")}
+function lev(a,b){const m=a.length,n=b.length;if(!m)return n;if(!n)return m;let p=Array(n+1).fill(0).map((_,j)=>j);for(let i=1;i<=m;i++){let c=[i];for(let j=1;j<=n;j++)c[j]=Math.min(p[j]+1,c[j-1]+1,p[j-1]+(a[i-1]===b[j-1]?0:1));p=c}return p[n]}
+function tol(len){return len<=4?0:len<=8?1:len<=16?2:3}
+function match(input,list){ // returns "exact" | "typo" | null
+  const x=norm(input);if(!x)return null;
+  for(const t of list){if(x===norm(t))return "exact"}
+  for(const t of list){const y=norm(t);if(lev(x,y)<=tol(y.length))return "typo"}
+  return null;
+}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function pick(a){return a[Math.floor(Math.random()*a.length)]}
+function blankHTML(s){return esc(s).replace("___",'<span class="blank" aria-label="blank">&nbsp;</span>')}
+function fillIn(s,w){return s.replace("___",w)}
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1)}
+
+// ---------- build one question instance from an item + format
+function makeQ(item,fmt){
+  if(item.kind==="cross"){
+    if(item.sub==="books"){const n=item.books.length,w=n===2?"two":"three";
+      if(fmt==="fill")return {item,fmt,prompt:`Which ${w} books ${esc(item.pred)}?`};
+      if(fmt==="mc"){const opts=shuffle([item.books,...item.d]).map(ks=>({label:esc(names(ks)),correct:ks===item.books}));return {item,fmt,prompt:`Which ${w} books ${esc(item.pred)}?`,opts}}
+      const truth=Math.random()<.5;const ks=truth?item.books:pick(item.d);
+      return {item,fmt,prompt:`${esc(names(ks))} ${ks.length===2?"both":"all"} ${esc(item.pred)}.`,truth};}
+    if(fmt==="fill")return {item,fmt,prompt:blankHTML(item.s)};
+    if(fmt==="mc")return {item,fmt,prompt:blankHTML(item.s),opts:shuffle([item.a,...item.d]).map(o=>({label:esc(o),correct:o===item.a}))};
+    const truth=Math.random()<.5;const w=truth?item.a:pick(item.d);
+    return {item,fmt,prompt:esc(fillIn(item.s,w)),truth};
+  }
+  const B=BOOKS[item.book];
+  if(item.kind==="iwb"){
+    if(fmt==="fill") return {item,fmt,prompt:`In which book does this happen? ${esc(cap(item.stmt))}.`,needsAuthor:true};
+    if(fmt==="mc"){const others=shuffle(KEYS.filter(k=>k!==item.book)).slice(0,3);const opts=shuffle([item.book,...others]).map(k=>({label:`${BOOKS[k].t} <span style="color:var(--muted)">by ${BOOKS[k].a}</span>`,correct:k===item.book}));
+      return {item,fmt,prompt:`In which book… ${esc(item.stmt)}?`,opts};}
+    const truth=Math.random()<.5;const k=truth?item.book:pick(KEYS.filter(x=>x!==item.book));
+    return {item,fmt,prompt:`In <i>${esc(BOOKS[k].t)}</i>, ${esc(item.stmt)}.`,truth};
+  }
+  if(fmt==="fill") return {item,fmt,prompt:`In <i>${esc(B.t)}</i>: ${blankHTML(item.s)}`};
+  if(fmt==="mc"){const opts=shuffle([item.a,...item.d]).map(o=>({label:esc(o),correct:o===item.a}));
+    return {item,fmt,prompt:`In <i>${esc(B.t)}</i>: ${blankHTML(item.s)}`,opts};}
+  const truth=Math.random()<.5;const w=truth?item.a:pick(item.d);
+  return {item,fmt,prompt:`In <i>${esc(B.t)}</i>, ${esc(fillIn((/^(The|At|As|In|On|After|By|Before|To|Treatment|Police|Places|Bev|Charlotte|Eden)\b/.test(item.s)&&!/^(Bev|Charlotte|Eden)\b/.test(item.s)?item.s.charAt(0).toLowerCase()+item.s.slice(1):item.s),w))}`,truth,shown:w};
+}
+function correctText(q){
+  const it=q.item;
+  if(it.kind==="cross")return it.sub==="books"?{t:names(it.books),a:it.note}:{t:fillIn(it.s,it.a),a:it.note};
+  const B=BOOKS[it.book];
+  if(it.kind==="iwb") return {t:B.t,a:`by ${B.a}`};
+  return {t:fillIn(it.s,it.a),a:`${B.t} · ${B.a}`};
+}
+// grade -> {ok, close, msg, yours}
+function grade(q,ans){
+  const it=q.item,B=BOOKS[it.book||KEYS[0]];
+  if(q.fmt==="mc"){const ok=!!(ans!=null&&q.opts[ans]&&q.opts[ans].correct);return {ok,yours:ans==null?"No answer":q.opts[ans].label.replace(/<[^>]+>/g,"")}}
+  if(q.fmt==="tf"){const ok=ans!=null&&ans===q.truth;return {ok,yours:ans==null?"No answer":(ans?"True":"False"),msg:q.truth?"That statement is true.":"That statement is false."}}
+  if(it.kind==="cross"){
+    if(it.sub==="text"){const m=match(ans||"",[it.a,...it.alts]);return {ok:!!m,msg:m==="typo"?"Accepted; check the spelling.":"",yours:ans||"(blank)"}}
+    const f=findBooks(ans||""),hit=it.books.filter(k=>f.includes(k)).length,extra=f.filter(k=>!it.books.includes(k)).length;
+    const ok=hit===it.books.length&&!extra;
+    return {ok,close:!ok&&hit>0,msg:ok?"":`You named ${hit} of the ${it.books.length} right books${extra?` plus ${extra} wrong one${extra>1?"s":""}`:""}.`,yours:ans||"(blank)"};
+  }
+  if(it.kind==="iwb"){
+    const t=ans?.title||"",a=ans?.author||"";
+    const nt=norm(t);
+    let tm=match(t,[...B.titleAlts,...B.shortAlts]);
+    if(!tm&&nt.length>=5&&B.titleAlts.some(x=>norm(x).includes(nt)))tm="exact";
+    const last=B.a.split(" ").slice(-1)[0];
+    const am=a?match(a,[...B.authorAlts,last]):null;
+    const notes=[];
+    if(tm==="typo")notes.push("Accepted; check the spelling.");
+    if(a&&!am)notes.push(`Author is ${B.a}.`);
+    return {ok:!!tm,msg:notes.join(" "),yours:(t||"(blank)")+(a?` / ${a}`:""),authorOk:!!am};
+  }
+  const m=match(ans||"",[it.a,...it.alts]);
+  return {ok:!!m,msg:m==="typo"?"Accepted; check the spelling.":"",yours:ans||"(blank)"};
+}
+
+// ---------- state & filters
+const S={mode:"practice",books:new Set(KEYS),fmt:"mix",type:"all",pool:"all",deck:[],i:0,cur:null,graded:null,
+  round:null,rlen:10,rsec:30};
+function pool(){return ITEMS.filter(it=>(it.books?it.books.some(k=>S.books.has(k)):S.books.has(it.book))&&(S.type==="all"||it.kind===S.type)&&(S.pool==="all"||res[it.id]==="miss"))}
+function fmtFor(){return S.fmt==="mix"?pick(["fill","tf","mc"]):S.fmt}
+function rebuild(){S.deck=shuffle(pool());S.i=0;S.cur=null;S.graded=null}
+
+const sp=document.getElementById("spines");
+KEYS.forEach(k=>{const b=BOOKS[k];const el=document.createElement("button");el.className="spine";el.style.setProperty("--c",`var(${b.c})`);
+  el.setAttribute("aria-pressed","true");el.dataset.k=k;el.innerHTML=`<i></i>${esc(b.t)}`;
+  el.onclick=()=>{if(S.books.has(k)){if(S.books.size>1)S.books.delete(k)}else S.books.add(k);
+    document.querySelectorAll(".spine").forEach(s=>s.setAttribute("aria-pressed",S.books.has(s.dataset.k)));stopTimer();S.round=null;rebuild();render()};
+  sp.appendChild(el)});
+function wireSeg(id,key){document.querySelectorAll(`#${id} button`).forEach(b=>b.onclick=()=>{S[key]=b.dataset.v;
+  document.querySelectorAll(`#${id} button`).forEach(x=>x.setAttribute("aria-pressed",x===b));stopTimer();S.round=null;rebuild();render()})}
+wireSeg("fmtSeg","fmt");wireSeg("typeSeg","type");wireSeg("poolSeg","pool");
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{S.mode=t.id.replace("tab-","");
+  document.querySelectorAll(".tab").forEach(x=>x.setAttribute("aria-selected",x===t));stopTimer();S.round=null;rebuild();render()});
+
+// ---------- timer
+let timerId=null,remain=0,onTimeout=null;
+function stopTimer(){if(timerId){clearInterval(timerId);timerId=null}}
+function startTimer(sec,cb){stopTimer();remain=sec;onTimeout=cb;paintTimer();timerId=setInterval(()=>{remain--;paintTimer();if(remain<=0){stopTimer();onTimeout&&onTimeout()}},1000)}
+function paintTimer(){const el=document.getElementById("timer");if(el){el.textContent=`0:${String(Math.max(remain,0)).padStart(2,"0")}`;el.classList.toggle("low",remain<=5)}
+  const bar=document.getElementById("tbar");if(bar)bar.style.width=`${Math.max(remain,0)/S.rsec*100}%`}
+
+// ---------- question card (shared by practice + round)
+function qLabel(q){const f={fill:"Fill in the blank",tf:"True or false",mc:"Multiple choice"}[q.fmt];return `${q.item.kind==="iwb"?"In which book":q.item.kind==="cross"?"Crossover":"Content"} · ${f}`}
+function answerArea(q,g,ans){
+  if(q.fmt==="mc"){
+    return `<div class="opts">${q.opts.map((o,i)=>{let cls="opt";if(g){if(o.correct)cls+=" right";else if(ans===i)cls+=" wrong"}
+      return `<button class="${cls}" data-opt="${i}" ${g?"disabled":""}><b>${"ABCD"[i]}</b><span>${o.label}</span></button>`}).join("")}</div>`;
+  }
+  if(q.fmt==="tf"){
+    return `<div class="opts">${[true,false].map(v=>{let cls="opt";if(g){if(v===q.truth)cls+=" right";else if(ans===v)cls+=" wrong"}
+      return `<button class="${cls}" data-tf="${v}" ${g?"disabled":""}><span>${v?"True":"False"}</span></button>`}).join("")}</div>`;
+  }
+  if(q.item.kind==="iwb"){
+    return `<form class="inputs" id="fform" autocomplete="off"><label for="in-title">Title<input id="in-title" ${g?"disabled":""} value="${esc(ans?.title||"")}" placeholder="Book title (short is fine)"></label>
+      <label for="in-author">Author (optional)<input id="in-author" ${g?"disabled":""} value="${esc(ans?.author||"")}" placeholder="Last name is fine"></label>
+      ${g?"":`<div class="actions"><button class="btn primary" type="submit">Check answer</button><span class="hint">Press Enter to check</span></div>`}</form>`;
+  }
+  const xb=q.item.kind==="cross"&&q.item.sub==="books";
+  return `<form class="inputs" id="fform" autocomplete="off"><label for="in-ans">${xb?"Books (any order; short titles are fine)":"Your answer"}<input id="in-ans" ${g?"disabled":""} value="${esc(ans||"")}" placeholder="${xb?"e.g. Culpability, Starling House":"Type the missing word or name"}"></label>
+    ${g?"":`<div class="actions"><button class="btn primary" type="submit">Check answer</button><span class="hint">Press Enter to check</span></div>`}</form>`;
+}
+function verdictHTML(q,g){
+  const c=correctText(q);const cls=g.ok?"ok":g.close?"close":"no";const v=g.ok?"Correct":g.close?"Not quite":"Incorrect";
+  return `<div class="verdict ${cls}" role="status"><span class="v">${v}${g.timeout?" · time ran out":""}</span>
+    ${g.msg?`<span>${esc(g.msg)}</span>`:""}<span class="t">${esc(c.t)}</span><span class="a">${esc(c.a)}</span></div>`;
+}
+function wireAnswer(q,submit){
+  document.querySelectorAll("[data-opt]").forEach(b=>b.onclick=()=>submit(+b.dataset.opt));
+  document.querySelectorAll("[data-tf]").forEach(b=>b.onclick=()=>submit(b.dataset.tf==="true"));
+  const f=document.getElementById("fform");
+  if(f&&!f.querySelector("input[disabled]")){
+    f.onsubmit=e=>{e.preventDefault();
+      if(q.item.kind==="iwb")submit({title:document.getElementById("in-title").value,author:document.getElementById("in-author").value});
+      else submit(document.getElementById("in-ans").value)};
+    const first=f.querySelector("input");if(first)first.focus({preventScroll:true});
+  }
+}
+function record(q,g){res[q.item.id]=g.ok?"got":"miss";save()}
+
+function tally(){
+  const vals=Object.values(res),got=vals.filter(v=>v==="got").length,miss=vals.filter(v=>v==="miss").length;
+  return `<div class="tally"><span><b>${got}</b> answered right last time</span><span><b>${miss}</b> missed</span><span><b>${ITEMS.length-got-miss}</b> not tried</span><span><b>${pool().length}</b> in current filter</span>${vals.length?`<button class="linkbtn" id="reset">Reset results</button>`:""}</div>`;
+}
+function wireReset(){const r=document.getElementById("reset");if(r)r.onclick=()=>{if(r.dataset.armed){res={};save();rebuild();render()}else{r.dataset.armed="1";r.textContent="Tap again to erase all results"}}}
+
+// ---------- render
+function render(){
+  const v=document.getElementById("view");
+  document.getElementById("filters").hidden=(S.mode==="briefs");
+  if(S.mode==="briefs"){v.innerHTML=briefs();wireBriefs();return}
+  if(S.mode==="round"){roundView(v);return}
+  if(!S.deck.length){v.innerHTML=`<div class="card"><p class="empty">${S.pool==="missed"?"No missed questions in this filter.":"No questions match this filter."}</p></div>${tally()}`;wireReset();return}
+  if(S.i>=S.deck.length){S.deck=shuffle(pool());S.i=0}
+  if(!S.cur){S.cur={q:makeQ(S.deck[S.i],fmtFor()),ans:null};S.graded=null}
+  const {q,ans}=S.cur,g=S.graded;
+  v.innerHTML=`<div class="card">
+    <div class="cardtop"><span class="type">${qLabel(q)}</span><span class="count">${S.i+1} of ${S.deck.length}</span></div>
+    <p class="q">${q.prompt}</p>
+    ${answerArea(q,g,ans)}
+    ${g?verdictHTML(q,g):""}
+    <div class="actions">${g?`<button class="btn primary" id="next">Next question</button>`:`<button class="btn" id="skip">Skip</button>`}</div>
+  </div>${tally()}`;
+  wireReset();
+  if(g){const n=document.getElementById("next");n.onclick=()=>{S.i++;S.cur=null;render()};n.focus({preventScroll:true});return}
+  document.getElementById("skip").onclick=()=>{S.i++;S.cur=null;render()};
+  wireAnswer(q,a=>{S.cur.ans=a;S.graded=grade(q,a);record(q,S.graded);render()});
+}
+
+function roundView(v){
+  const R=S.round;
+  if(!R){
+    const n=pool().length;
+    v.innerHTML=`<div class="card setup">
+      <div class="cardtop"><span class="type">Timed round</span><span class="count">${n} questions available</span></div>
+      <p class="q">Answer against the clock. Each question is graded when you submit or when time runs out, and you'll see every answer at the end.</p>
+      <div class="row"><span class="label">Questions</span><div class="seg" id="rlen">${[10,20,30].map(x=>`<button data-v="${x}" aria-pressed="${S.rlen===x}">${x}</button>`).join("")}</div>
+      <span class="label">Seconds each</span><div class="seg" id="rsec">${[20,30,45].map(x=>`<button data-v="${x}" aria-pressed="${S.rsec===x}">${x}</button>`).join("")}</div></div>
+      <p class="hint">Uses the book, style and type filters above.</p>
+      <div class="actions"><button class="btn primary" id="go" ${n?"":"disabled"}>Start round</button></div></div>`;
+    document.querySelectorAll("#rlen button").forEach(b=>b.onclick=()=>{S.rlen=+b.dataset.v;render()});
+    document.querySelectorAll("#rsec button").forEach(b=>b.onclick=()=>{S.rsec=+b.dataset.v;render()});
+    document.getElementById("go").onclick=()=>{const items=shuffle(pool()).slice(0,S.rlen);
+      S.round={qs:items.map(it=>makeQ(it,fmtFor())),i:0,log:[],ans:null,g:null};render()};
+    return;
+  }
+  if(R.i>=R.qs.length){
+    stopTimer();const score=R.log.filter(l=>l.g.ok).length;
+    v.innerHTML=`<div class="card"><div class="cardtop"><span class="type">Round complete</span><span class="count">${score} of ${R.qs.length}</span></div>
+      <p class="q">You got ${score} of ${R.qs.length} right.</p>
+      <ul class="review">${R.log.map(l=>{const c=correctText(l.q);return `<li><span class="mark ${l.g.ok?"ok":"no"}">${l.g.ok?"Right":"Missed"}${l.g.timeout?" · out of time":""}</span>
+        <span>${l.q.prompt}</span><span class="yours">Your answer: ${esc(l.g.yours||"")}</span><span><b>${esc(c.t)}</b> <span class="yours">${esc(c.a)}</span></span></li>`}).join("")}</ul>
+      <div class="actions"><button class="btn primary" id="again">New round</button></div></div>`;
+    document.getElementById("again").onclick=()=>{S.round=null;render()};
+    return;
+  }
+  const q=R.qs[R.i],g=R.g;
+  const submit=(a,timeout)=>{if(R.g)return;stopTimer();R.ans=a;R.g=grade(q,a);if(timeout){R.g.timeout=true;R.g.ok=false}record(q,R.g);R.log.push({q,g:R.g});render()};
+  v.innerHTML=`<div class="card">
+    <div class="cardtop"><span class="type">${qLabel(q)}</span><span class="count">${R.i+1} of ${R.qs.length} · <span class="timer" id="timer"></span></span></div>
+    <div class="bar"><span id="tbar" style="width:${g?0:100}%"></span></div>
+    <p class="q">${q.prompt}</p>
+    ${answerArea(q,g,R.ans)}
+    ${g?verdictHTML(q,g):""}
+    <div class="actions">${g?`<button class="btn primary" id="next">${R.i+1<R.qs.length?"Next question":"See results"}</button>`:""}</div>
+  </div><div class="tally"><span>Score <b>${R.log.filter(l=>l.g.ok).length}</b> of ${R.log.length}</span></div>`;
+  if(g){const n=document.getElementById("next");n.onclick=()=>{R.i++;R.ans=null;R.g=null;render()};n.focus({preventScroll:true});paintTimer();return}
+  wireAnswer(q,a=>submit(a,false));
+  startTimer(S.rsec,()=>{let a=null;const f=document.getElementById("fform");
+    if(f){a=q.item.kind==="iwb"?{title:document.getElementById("in-title").value,author:document.getElementById("in-author").value}:document.getElementById("in-ans").value}
+    const gr=grade(q,a);if(f&&gr.ok){submit(a,false)}else submit(a,true)});
+}
+
+// ---------- briefs
+let briefKey=KEYS[0];
+try{const h=location.hash.slice(1);if(BOOKS[h]){briefKey=h;S.mode="briefs";document.querySelectorAll(".tab").forEach(x=>x.setAttribute("aria-selected",x.id==="tab-briefs"))}}catch(e){}
+function briefs(){
+  const b=BOOKS[briefKey];
+  return `<div class="bookpick">${KEYS.map(k=>`<button class="spine" data-bk="${k}" aria-pressed="${k===briefKey}" style="--c:var(${BOOKS[k].c})"><i></i>${esc(BOOKS[k].t)}</button>`).join("")}</div>
+  <article class="brief" style="--c:var(${b.c})">
+    <div><h2>${esc(b.t)}</h2><p class="by">by ${esc(b.a)}</p></div>
+    <dl class="facts">${b.facts.map(f=>`<div><dt>${esc(f[0])}</dt><dd>${esc(f[1])}</dd></div>`).join("")}</dl>
+    <section><h3>Characters${b.cast.length>12?" and key figures":""}</h3><dl class="cast">${b.cast.map(c=>`<div><dt>${esc(c[0])}</dt><dd>${esc(c[1])}</dd></div>`).join("")}</dl></section>
+    <section><h3>Places</h3><ul class="places">${b.places.map(p=>`<li>${esc(p)}</li>`).join("")}</ul></section>
+    <section><h3>The story</h3><p>${esc(b.plot[0])}</p>
+      <details class="spoil"><summary>Rest of the plot, with spoilers</summary>${b.plot.slice(1).map(p=>`<p>${esc(p)}</p>`).join("")}</details></section>
+    <section><h3>Fun facts: the book and the author</h3><ul class="fun">${b.fun.map(f=>`<li>${esc(f)}</li>`).join("")}</ul></section>
+  </article>`;
+}
+function wireBriefs(){document.querySelectorAll("[data-bk]").forEach(x=>x.onclick=()=>{briefKey=x.dataset.bk;render();window.scrollTo({top:0})})}
+
+rebuild();render();
+</script>
+
+</body>
+</html>
